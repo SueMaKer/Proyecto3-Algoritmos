@@ -1,0 +1,27 @@
+# Ignorar ejecutables y binarios
+/bin/
+build/
+*.o
+*.out
+*.exe
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Archivos de logs o temporales
+*.log
+*.tmp
+
+# Archivos generados automáticamente
+*.d
+*.class
+*.jar
+
+# Archivos de entorno de desarrollo
+.vscode/
+.idea/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
