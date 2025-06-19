@@ -1,18 +1,7 @@
 import random
 
 def mutate(individual, params):
-    """
-    Aplica mutación a un cromosoma según el tipo y tasa definidos.
-
-    Args:
-        individual (list): Cromosoma a mutar.
-        params (dict): Debe incluir:
-            - 'mutation_rate': probabilidad de mutar cada gen (float entre 0 y 1)
-            - 'mutation_type': 'bitflip' o 'swap'
-
-    Returns:
-        list: Cromosoma mutado (nueva lista)
-    """
+   
     mutation_type = params.get('mutation_type', 'bitflip')
     rate = params.get('mutation_rate', 0.01)
 
@@ -24,10 +13,10 @@ def mutate(individual, params):
         raise ValueError(f"Tipo de mutación no soportado: {mutation_type}")
 
 
-# === Métodos de mutación ===
+
 
 def bitflip_mutation(individual, rate):
-    # Aplica mutación bit a bit con cierta probabilidad
+    
     mutated = []
     for bit in individual:
         if random.random() < rate:

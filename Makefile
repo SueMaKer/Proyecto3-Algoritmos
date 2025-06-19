@@ -119,6 +119,10 @@ msan: XC = clang++
 tsan: FLAGS += -fsanitize=thread  ## Build for detecting thread errors, e.g race conditions
 ubsan: FLAGS += -fsanitize=undefined  ## Build for detecting undefined behavior
 asan msan tsan ubsan: debug
+# Run Python Subset Sum test
+.PHONY: py-test-subset-sum
+py-test-subset-sum:
+	PYTHONPATH=src python3 -m tests.test_subset_sum
 
 -include $(MAKFILE).mk
 -include *.mk $(DEPENDS)

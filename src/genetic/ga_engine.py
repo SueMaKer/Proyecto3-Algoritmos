@@ -1,8 +1,13 @@
 import random
-from genetic.selection import select_parents
-from genetic.crossover import crossover
-from genetic.mutation import mutate
-from genetic.elitism import apply_elitism
+#from genetic.selection import select_parents
+#from genetic.crossover import crossover
+#from genetic.mutation import mutate
+#from genetic.elitism import apply_elitism
+
+from .selection import select_parents
+from .crossover import crossover
+from .mutation import mutate
+from .elitism import apply_elitism
 
 def genetic_algorithm(fitness_fn, chromosome_generator, params):
   
