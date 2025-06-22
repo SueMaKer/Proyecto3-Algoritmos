@@ -14,7 +14,6 @@ def mutate(individual, params):
 
 
 
-
 def bitflip_mutation(individual, rate):
     
     mutated = []
