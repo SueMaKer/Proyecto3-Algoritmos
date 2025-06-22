@@ -49,20 +49,30 @@ class MultiDimensionalKnapsackTester:
         # ✅ Assert: Recursive and DP must match
         assert result_recursive == result_dp, "Mismatch: Recursive and DP solutions must be equal"
 
-        # 3. Genetic Algorithm
-        print("\n[3] Genetic Algorithm:")
-        best_chromosome, best_value = genetic_knapsack_solver(
-            self.item_weights, self.item_values, self.capacity_limits, self.num_dimensions,
-            population_size=50, generations=200, mutation_rate=0.05
-        )
-        print("Best Chromosome:", best_chromosome)
-        print("Fitness (Value):", best_value)
+        # 3. Genetic Algorithm with different selection methods
+        print("\n[3] Genetic Algorithm (Ranking, Ruleta, Torneo):")
+        for method in ["ranking", "ruleta", "torneo"]:
+            print(f"\n → Method: {method}")
+            best_chromosome, best_value = genetic_knapsack_solver(
+                self.item_weights,
+                self.item_values,
+                self.capacity_limits,
+                self.num_dimensions,
+                population_size=50,
+                generations=200,
+                mutation_rate=0.05,
+                crossover_rate=0.8,
+                elitism_count=3,
+                selection_method=method
+            )
+            print("   Best Chromosome:", best_chromosome)
+            print("   Fitness (Value):", best_value)
 
-        # ✅ Assert: Genetic value must not exceed optimal
-        assert best_value <= result_dp, "Genetic algorithm exceeded optimal value (shouldn't happen)"
+            # ✅ Assert: Genetic value must not exceed optimal
+            assert best_value <= result_dp, f"Genetic algorithm ({method}) exceeded optimal value"
 
-        # ✅ Assert: Genetic solution must be feasible
-        assert self.is_solution_feasible(best_chromosome), "Genetic algorithm returned infeasible solution"
+            # ✅ Assert: Genetic solution must be feasible
+            assert self.is_solution_feasible(best_chromosome), f"Genetic solution with method '{method}' is infeasible"
 
         print("\n✅ All tests passed successfully.")
 
