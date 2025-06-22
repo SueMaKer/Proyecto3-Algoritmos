@@ -12,9 +12,6 @@ def mutate(individual, params):
     else:
         raise ValueError(f"Tipo de mutación no soportado: {mutation_type}")
 
-
-
-
 def bitflip_mutation(individual, rate):
     
     mutated = []
