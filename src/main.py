@@ -51,3 +51,34 @@ start = time.perf_counter()
 resultado_dp = dp_topdown_knapsack(data)
 end = time.perf_counter()
 print(f"DP top-down solution: {resultado_dp}, time: {end - start:.6f} seconds")
+
+
+
+
+from genetic.subset_sum import fitness_subset_sum
+
+data = {
+    "items": [3, 34, 4, 12, 5, 2],
+    "target": 9
+}
+
+# Ejecutar el algoritmo genético
+solution, fitness, history = genetic_algorithm(
+    fitness_func=fitness_subset_sum,
+    data=data,
+    generations=100,
+    population_size=200,
+    crossover_rate=0.8,
+    mutation_rate=0.1,
+    elitism_count=3,
+    selection_method="tournament",
+    verbose=True
+)
+
+# Mostrar resultado
+print("\nMejor solución:", solution)
+print("Suma alcanzada:", fitness)
+
+# Mostrar los elementos seleccionados
+items_elegidos = [item for gene, item in zip(solution, data["items"]) if gene]
+print("Items seleccionados:", items_elegidos)
