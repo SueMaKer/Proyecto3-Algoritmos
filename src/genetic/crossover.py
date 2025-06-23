@@ -1,36 +1,11 @@
 import random
 
-def crossover(parent1, parent2, params):
-    """
-    Aplica cruce entre dos padres según el tipo y la probabilidad definida.
+def crossover(parent1, parent2, crossover_rate):
+    if random.random() > crossover_rate:
+        return parent1.copy()
 
-    Args:
-        parent1 (list): Cromosoma del primer padre.
-        parent2 (list): Cromosoma del segundo padre.
-        params (dict): Parámetros del algoritmo, debe incluir:
-            - 'crossover_rate'
-            - 'crossover_type': '1point', '2point', 'uniform'
-
-    Returns:
-        tuple: (hijo1, hijo2)
-    """
-
-    if random.random() > params.get('crossover_rate', 1.0):
-       
-        return parent1[:], parent2[:]
-
-    crossover_type = params.get('crossover_type', '1point')
-
-    if crossover_type == '1point':
-        return one_point_crossover(parent1, parent2)
-    elif crossover_type == '2point':
-        return two_point_crossover(parent1, parent2)
-    elif crossover_type == 'uniform':
-        return uniform_crossover(parent1, parent2)
-    else:
-        raise ValueError(f"Tipo de cruce no soportado: {crossover_type}")
-
-
+    point = random.randint(1, len(parent1) - 1)
+    return parent1[:point] + parent2[point:]
 
 
 def one_point_crossover(p1, p2):
