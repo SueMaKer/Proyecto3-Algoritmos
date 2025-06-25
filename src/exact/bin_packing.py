@@ -1,77 +1,107 @@
-def fitness_bin_packing(solution, bin_capacity=1.0, overflow_penalty=20):
-    num_bins = len(solution)
-    total_waste = 0
-    for bin in solution:
-        total_bin_weight = sum(bin)
-        if total_bin_weight > bin_capacity:
-            total_waste += (total_bin_weight - bin_capacity) * overflow_penalty
+def fitness_bin_packing(chromosome, data):
+    items = data["items"]
+    capacity = data["bin_capacity"]
+
+    bins = {}
+
+    for item_idx, bin_idx in enumerate(chromosome):
+        bins.setdefault(bin_idx, 0)
+        bins[bin_idx] += items[item_idx]
+
+    used_bins = len(bins)
+    valid_bins = 0
+    penalty = 0
+
+    for total_weight in bins.values():
+        if total_weight <= capacity:
+            valid_bins += 1
         else:
-            total_waste += (bin_capacity - total_bin_weight)
+            # Penalty for exceeding capacity
+            penalty += (total_weight - capacity) * 10
 
-    fitness = 1 / (num_bins + total_waste + 1e-6)
-    return fitness
+    if used_bins == 0:
+        return 0
 
-def bin_packing_recursive(items, bin_capacity=1.0):
+    fitness = (1000 * valid_bins / used_bins) - penalty
+    return max(fitness, 0)
 
-    def pack(remaining_items, bins):
-        if not remaining_items:
-            return len(bins)
-        
-        item = remaining_items[0]
-        rest = remaining_items[1:]
-        
-        min_bins = float('inf')
+
+
+def bin_packing_individual(num_items):
+    import random
+    return [random.randint(0, num_items - 1) for _ in range(num_items)]
+
+def recursive_bin_packing(items, bin_capacity=1.0):
+    best = {"bins": None, "assignment": None, "num_bins": float('inf')}
+
+    def backtrack(index, bins, assignment):
+        if index == len(items):
+            if len(bins) < best["num_bins"]:
+                best["num_bins"] = len(bins)
+                best["bins"] = bins[:]
+                best["assignment"] = assignment[:]
+            return
+
+        item = items[index]
 
         for i in range(len(bins)):
             if bins[i] + item <= bin_capacity:
                 bins[i] += item
-                min_bins = min(min_bins, pack(rest, bins))
-                bins[i] -= item  # backtrack
+                assignment.append(i)
+                backtrack(index + 1, bins, assignment)
+                assignment.pop()
+                bins[i] -= item
 
         bins.append(item)
-        min_bins = min(min_bins, pack(rest, bins))
-        bins.pop()  # backtrack
+        assignment.append(len(bins) - 1)
+        backtrack(index + 1, bins, assignment)
+        assignment.pop()
+        bins.pop()
 
-        return min_bins
+    backtrack(0, [], [])
+    return best["assignment"]
 
-    return pack(items, [])
-
-
-def bin_packing_memo(items, bin_capacity=1.0):
-
+def dp_bin_packing(items, bin_capacity=1.0):
     SCALE = 100
-    items = [int(i * SCALE) for i in items]
+    items_scaled = [int(i * SCALE) for i in items]
     bin_capacity = int(bin_capacity * SCALE)
-    n = len(items)
+    n = len(items_scaled)
+    memo = {}
 
-    cache = {}
-
-    def pack(index, bins_tuple):
-        key = (index, bins_tuple)
-
-        if key in cache:
-            return cache[key]
+    def helper(index, bins, assignment):
+        key = (index, tuple(sorted(bins)))
+        if key in memo:
+            return memo[key]
 
         if index == n:
-            return len(bins_tuple)
+            return len(bins), assignment[:]
 
-        item = items[index]
-        min_bins = float('inf')
+        item = items_scaled[index]
+        best_bins = float('inf')
+        best_assignment = []
 
-        # Probar colocar en bins existentes
-        for i in range(len(bins_tuple)):
-            if bins_tuple[i] + item <= bin_capacity:
-                new_bins = list(bins_tuple)
-                new_bins[i] += item
-                new_bins_sorted = tuple(sorted(new_bins))
-                min_bins = min(min_bins, pack(index + 1, new_bins_sorted))
+        for i in range(len(bins)):
+            if bins[i] + item <= bin_capacity:
+                bins[i] += item
+                assignment.append(i)
+                used, assign = helper(index + 1, bins, assignment)
+                if used < best_bins:
+                    best_bins = used
+                    best_assignment = assign[:]
+                assignment.pop()
+                bins[i] -= item
 
-        # Probar abrir un nuevo bin
-        new_bins = list(bins_tuple) + [item]
-        new_bins_sorted = tuple(sorted(new_bins))
-        min_bins = min(min_bins, pack(index + 1, new_bins_sorted))
+        bins.append(item)
+        assignment.append(len(bins) - 1)
+        used, assign = helper(index + 1, bins, assignment)
+        if used < best_bins:
+            best_bins = used
+            best_assignment = assign[:]
+        assignment.pop()
+        bins.pop()
 
-        cache[key] = min_bins
-        return min_bins
+        memo[key] = (best_bins, best_assignment)
+        return memo[key]
 
-    return pack(0, tuple())
+    _, best_assignment = helper(0, [], [])
+    return best_assignment
