@@ -171,3 +171,4 @@ if __name__ == "__main__":
         elitism_proportion=0.06             # proporción de individuos elitistas
 
     )
+ 
