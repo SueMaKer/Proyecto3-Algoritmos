@@ -64,5 +64,17 @@ def subset_sum_top_down(data, n=None, target=None, memo=None):
     return result
 
 
-def binary_individual(num_items):
+def subset_individual(num_items, data):
     return [random.randint(0, 1) for _ in range(num_items)]
+
+
+def heuristic_individual_subset(n_items, data):
+    target = data["target"]
+    chromosome = [0] * n_items
+    current_sum = 0
+    items_sorted = sorted(enumerate(data["items"]), key=lambda x: x[1], reverse=True)
+    for i, val in items_sorted:
+        if current_sum + val <= target:
+            chromosome[i] = 1
+            current_sum += val
+    return chromosome

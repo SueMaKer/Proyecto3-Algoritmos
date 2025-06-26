@@ -1,6 +1,7 @@
 from .selection import select_parents
 from .crossover import crossover
 from .mutation import mutate
+from .elitism import apply_elitism
 from .utils import should_stop
 
 import random
@@ -9,11 +10,13 @@ import random
 def genetic_algorithm(fitness_func, data, *,
                       population_size=50, generations=200,
                       crossover_rate=0.8, mutation_rate=0.01,
-                      elitism_count=2, selection_method="ranking",
+                      elitism_rate=0.05,  # proporción en lugar de conteo fijo
+                      selection_method="ranking",
                       max_no_improvement=30, verbose=False,
-                      create_individual=None):
+                      create_individual=None, crossover_operator="uniform",
+                      mutation_operator="bit_flip", tournament_size=3):
 
-    population = [create_individual(len(data["items"])) for _ in range(population_size)]
+    population = [create_individual(len(data["items"]), data) for _ in range(population_size)]
     best_solution = None
     best_fitness = float('-inf')
     fitness_history = []
@@ -38,20 +41,23 @@ def genetic_algorithm(fitness_func, data, *,
                 print(f"Converged at generation {gen}")
             break
 
-        elites = [chrom for chrom, _ in evaluated[:elitism_count]]
         population = [chrom for chrom, _ in evaluated]
         fitness_scores = [fit for _, fit in evaluated]
 
         params = {
             "selection_method": selection_method,
-            "tournament_size": 3
+            "tournament_size": tournament_size,
+            "elitism_rate": elitism_rate
         }
 
+        elites = apply_elitism(population, fitness_scores, params)
+        elite_count = len(elites)
+
         children = []
-        while len(children) < population_size - elitism_count:
+        while len(children) < population_size - elite_count:
             parent1, parent2 = select_parents(population, fitness_scores, params)
-            child = crossover(parent1, parent2, crossover_rate)
-            child = mutate(child, mutation_rate)
+            child = crossover(parent1, parent2, crossover_rate, crossover_operator)
+            child = mutate(child, mutation_rate, mutation_operator)
             children.append(child)
 
         population = elites + children

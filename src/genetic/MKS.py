@@ -80,5 +80,18 @@ def fitness_knapsack(chromosome, data):
 
     return total_value
 
-def binary_individual(num_items):
-    return [random.randint(0, 1) for _ in range(num_items)]
+def knapsack_individual(n_items, data=None):
+    return [random.randint(0, 1) for _ in range(n_items)]
+
+def heuristic_individual_knapsack(n_items, data):
+    ratios = [(v / sum(w), i) for i, (v, w) in enumerate(zip(data["values"], data["weights"]))]
+    ratios.sort(reverse=True)
+    chromosome = [0] * n_items
+    current = [0] * data["num_dimensions"]
+    for _, i in ratios:
+        fits = all(current[d] + data["weights"][i][d] <= data["capacities"][d] for d in range(data["num_dimensions"]))
+        if fits:
+            chromosome[i] = 1
+            for d in range(data["num_dimensions"]):
+                current[d] += data["weights"][i][d]
+    return chromosome

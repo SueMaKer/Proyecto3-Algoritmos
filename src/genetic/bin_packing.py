@@ -28,12 +28,13 @@ def fitness_bin_packing(chromosome, data):
     return max(fitness, 0)
 
 
-
-def bin_packing_individual(num_items):
+def bin_packing_individual(num_items, data=None):
     import random
     return [random.randint(0, num_items - 1) for _ in range(num_items)]
 
-def recursive_bin_packing(items, bin_capacity=1.0):
+def recursive_bin_packing(data):
+    items = data ["items"]
+    bin_capacity = data ["bin_capacity"]
     best = {"bins": None, "assignment": None, "num_bins": float('inf')}
 
     def backtrack(index, bins, assignment):
@@ -63,7 +64,9 @@ def recursive_bin_packing(items, bin_capacity=1.0):
     backtrack(0, [], [])
     return best["assignment"]
 
-def dp_bin_packing(items, bin_capacity=1.0):
+def dp_bin_packing(data):
+    items = data ["items"]
+    bin_capacity = data ["bin_capacity"]
     SCALE = 100
     items_scaled = [int(i * SCALE) for i in items]
     bin_capacity = int(bin_capacity * SCALE)
@@ -109,5 +112,19 @@ def dp_bin_packing(items, bin_capacity=1.0):
     return best_assignment
 
 
-def bin_packing_individual(num_items):
-    return [random.randint(0, num_items - 1) for _ in range(num_items)]
+
+def heuristic_individual_binpacking(n_items, data):
+    chromosome = [0] * n_items
+    bins = []
+    for i, item in enumerate(data["items"]):
+        placed = False
+        for b, bin_load in enumerate(bins):
+            if bin_load + item <= data["bin_capacity"]:
+                chromosome[i] = b
+                bins[b] += item
+                placed = True
+                break
+        if not placed:
+            chromosome[i] = len(bins)
+            bins.append(item)
+    return chromosome

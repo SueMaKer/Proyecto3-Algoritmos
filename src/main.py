@@ -1,121 +1,173 @@
 from genetic.algorithm import genetic_algorithm
-from genetic.MKS import fitness_knapsack, recursive_knapsack, dp_topdown_knapsack, binary_individual as knapsack_individual
-from genetic.bin_packing import fitness_bin_packing, bin_packing_individual
-from genetic.subset_sum import fitness_subset_sum, binary_individual
+from genetic.MKS import fitness_knapsack, recursive_knapsack, dp_topdown_knapsack, knapsack_individual, heuristic_individual_knapsack
+from genetic.bin_packing import fitness_bin_packing, bin_packing_individual, recursive_bin_packing, dp_bin_packing, heuristic_individual_binpacking
+from genetic.subset_sum import fitness_subset_sum, subset_individual, recursive_subset_sum, subset_sum_top_down, heuristic_individual_subset
+from genetic.partition import fitness_partition, partition_individual, recursive_partition, dp_topdown_partition, heuristic_individual_partition
 
 import time
+import random
 
-# --- Problema Knapsack ---
+def measure_average_time(func, data, repetitions=30):
+    times = []
+    for _ in range(repetitions):
+        start = time.perf_counter()
+        func(data)
+        end = time.perf_counter()
+        times.append(end - start)
+    return sum(times) / len(times)
 
-data_knapsack = {
-    "weights": [
-        [2, 2],
-        [4, 2],
-        [3, 4],
-        [6, 1],
-        [1, 3],
-        [2, 5],
-        [5, 3],
-        [4, 4],
-        [3, 2],
-        [2, 1]
-    ],
-    "values": [40, 50, 60, 30, 20, 70, 80, 55, 25, 15],
-    "capacities": [15, 15],
-    "num_dimensions": 2,
-    "items": list(range(10))
-}
-
-start = time.perf_counter()
-solution, fitness, history = genetic_algorithm(
-    fitness_func=fitness_knapsack,
-    data=data_knapsack,
-    create_individual=knapsack_individual,
-    generations=100,
+def run_all_experiments(
     population_size=200,
-    crossover_rate=0.8,
-    mutation_rate=0.2,
-    elitism_count=3,
-    selection_method="roulette",
-    verbose=True
-)
-end = time.perf_counter()
-
-print("\nMejor solución knapsack:", solution)
-print("Fitness knapsack:", fitness)
-print(f"Tiempo solución genética knapsack: {end - start:.6f} segundos")
-
-start = time.perf_counter()
-resultado_recursivo = recursive_knapsack(data_knapsack)
-end = time.perf_counter()
-print(f"Solución recursiva knapsack: {resultado_recursivo}, tiempo: {end - start:.6f} segundos")
-
-start = time.perf_counter()
-resultado_dp = dp_topdown_knapsack(data_knapsack)
-end = time.perf_counter()
-print(f"Solución DP top-down knapsack: {resultado_dp}, tiempo: {end - start:.6f} segundos")
-
-
-# --- Problema Subset Sum ---
-
-data_subset = {
-    "items": [3, 34, 4, 12, 5, 2],
-    "target": 9
-}
-
-start = time.perf_counter()
-solution, fitness, history = genetic_algorithm(
-    fitness_func=fitness_subset_sum,
-    data=data_subset,
-    create_individual=binary_individual,
     generations=100,
-    population_size=200,
+    repetitions=30,
+    num_items=10,
+    init_method="random",
+    selection_method="tournament",
+    tournament_size=3,
     crossover_rate=0.8,
     mutation_rate=0.1,
-    elitism_count=3,
-    selection_method="tournament",
-    verbose=True
-)
-end = time.perf_counter()
-print(f"Tiempo solución genética subset_sum: {end - start:.6f} segundos")
+    crossover_operator="uniform",
+    mutation_operator="bit_flip",
+    elitism_proportion=0.05
+):
+    random.seed(42)  # Reproducibilidad
 
-print("\nMejor solución subset sum:", solution)
-print("Suma alcanzada subset sum:", fitness)
-items_elegidos = [item for gene, item in zip(solution, data_subset["items"]) if gene]
-print("Ítems seleccionados subset sum:", items_elegidos)
+    items_generated = [random.randint(1, 10) for _ in range(num_items)]
+    weights_generated = [[random.randint(1, 6), random.randint(1, 6)] for _ in range(num_items)]
+    values_generated = [random.randint(10, 100) for _ in range(num_items)]
 
+    problems = [
+        {
+            "name": "Knapsack",
+            "data": {
+                "weights": weights_generated,
+                "values": values_generated,
+                "capacities": [15, 15],
+                "num_dimensions": 2,
+                "items": list(range(num_items))
+            },
+            "fitness": fitness_knapsack,
+            "exact_recursive": recursive_knapsack,
+            "exact_dp": dp_topdown_knapsack,
+            "individual": knapsack_individual,
+            "heuristic_individual": heuristic_individual_knapsack
+        },
+        {
+            "name": "Subset Sum",
+            "data": {
+                "items": items_generated,
+                "target": sum(items_generated) // 2
+            },
+            "fitness": fitness_subset_sum,
+            "exact_recursive": recursive_subset_sum,
+            "exact_dp": subset_sum_top_down,
+            "individual": subset_individual,
+            "heuristic_individual": heuristic_individual_subset
+        },
+        {
+            "name": "Bin Packing",
+            "data": {
+                "items": items_generated,
+                "bin_capacity": 10
+            },
+            "fitness": fitness_bin_packing,
+            "exact_recursive": recursive_bin_packing,
+            "exact_dp": dp_bin_packing,
+            "individual": bin_packing_individual,
+            "heuristic_individual": heuristic_individual_binpacking
+        },
+        {
+            "name": "Partition",
+            "data": {
+                "items": items_generated
+            },
+            "fitness": fitness_partition,
+            "exact_recursive": recursive_partition,
+            "exact_dp": dp_topdown_partition,
+            "individual": partition_individual,
+            "heuristic_individual": heuristic_individual_partition
+        }
+    ]
 
-# --- Problema Bin Packing ---
+    latex_rows = []
 
-data_binpacking = {
-    "items": [4, 8, 1, 4, 2, 1, 7, 3],
-    "bin_capacity": 10
-}
+    for problem in problems:
+        print(f"\n--- Problema {problem['name']} ---")
 
-start = time.perf_counter()
-solution, fitness, history = genetic_algorithm(
-    fitness_func=fitness_bin_packing,
-    data=data_binpacking,
-    create_individual=bin_packing_individual,
-    population_size=100,
-    generations=200,
-    crossover_rate=0.8,
-    mutation_rate=0.02,
-    elitism_count=2,
-    selection_method="ranking",
-    verbose=True
-)
-end = time.perf_counter()
-print(f"Tiempo solución genética bin_packing: {end - start:.6f} segundos")
+        create_individual = problem["individual"]
+        if init_method == "heuristic" and "heuristic_individual" in problem:
+            create_individual = problem["heuristic_individual"]
 
-print("\nMejor solución bin packing:", solution)
-print("Fitness bin packing:", fitness)
+        start = time.perf_counter()
+        solution, fitness, history = genetic_algorithm(
+            fitness_func=problem["fitness"],
+            data=problem["data"],
+            create_individual=create_individual,
+            generations=generations,
+            population_size=population_size,
+            crossover_rate=crossover_rate,
+            mutation_rate=mutation_rate,
+            elitism_rate=elitism_proportion,
+            selection_method=selection_method,
+            tournament_size=tournament_size,
+            crossover_operator=crossover_operator,
+            mutation_operator=mutation_operator,
+            verbose=False
+        )
+        end = time.perf_counter()
+        time_ga = end - start
 
-# Mostrar bins con sus items
-bins = {}
-for item, bin_idx in zip(data_binpacking["items"], solution):
-    bins.setdefault(bin_idx, []).append(item)
+        time_recursive = measure_average_time(problem["exact_recursive"], problem["data"], repetitions)
+        time_dp = measure_average_time(problem["exact_dp"], problem["data"], repetitions)
 
-print("Items agrupados en bins:")
-for b, items_in_bin in bins.items():
-    print(f"Bin {b}: {items_in_bin}")
+        latex_rows.append(f"{problem['name']} & {fitness:.4f} & {time_ga:.6f} & {time_recursive:.6f} & {time_dp:.6f} \\\\")
+
+    # Impresión de la tabla LaTeX completa
+    print("\n=== TABLA COMPARATIVA (FORMATO LATEX) ===\n")
+    print("\\noindent\\textbf{Par\'ametros de la prueba:}\\\\")
+    print(f"- Tama\\~no del conjunto de \\textit{{items}}: {num_items}\\\\")
+    print(f"- Inicializaci\'on: {init_method}\\\\")
+    print(f"- Algoritmo gen\'etico: poblaci\'on = {population_size}, generaciones = {generations}\\\\")
+    print(f"- M\'etodo de selecci\'on: {selection_method}\\\\")
+    if selection_method == "tournament":
+        print(f"- Tama\\~no de torneo: {tournament_size}\\\\")
+    print(f"- Tasa de cruce: {crossover_rate}\\\\")
+    print(f"- Operador de cruce: {crossover_operator}\\\\")
+    print(f"- Tasa de mutaci\'on: {mutation_rate}\\\\")
+    print(f"- Operador de mutaci\'on: {mutation_operator}\\\\")
+    print(f"- Proporci\'on de elitismo: {elitism_proportion}\\\\")
+    print(f"- M\'etodos exactos: {repetitions} repeticiones promedio para medir tiempo\\\\\n")
+
+    print("\\begin{table}[H]")
+    print("\\centering")
+    print("\\begin{tabular}{|l|c|c|c|c|}")
+    print("\\hline")
+    print("\\textbf{Problema} & \\textbf{Fitness GA} & \\textbf{Tiempo GA (s)} & \\textbf{Tiempo Recursivo (s)} & \\textbf{Tiempo DP (s)} \\\\")
+    print("\\hline")
+    for row in latex_rows:
+        row = row.strip()
+        if not row.endswith("\\\\"):
+            row += " \\\\"  # doble barra para LaTeX
+        print(row)
+    print("\\hline")
+    print("\\end{tabular}")
+    print("\\caption{Comparaci\'on de algoritmos gen\'eticos, recursivos y programaci\'on din\'amica}")
+    print("\\label{tab:comparacion_algoritmos}")
+    print("\\end{table}")
+
+if __name__ == "__main__":
+    run_all_experiments(
+        population_size=150,
+        generations=80,
+        repetitions=30,
+        num_items=15,
+        init_method="random",            # "heuristic" , "random"
+        selection_method="roulette",      # "tournament", "ranking", "roulette"
+        tournament_size=3,
+        mutation_rate=0.2,
+        crossover_rate=0.8,
+        crossover_operator="uniform",       # "one_point", "two_point", "uniform"
+        mutation_operator="bit_flip",       # "bit_flip", "swap"
+        elitism_proportion=0.06             # proporción de individuos elitistas
+
+    )
