@@ -1,3 +1,5 @@
+import random
+
 def fitness_subset_sum(chromosome, data):
     items = data["items"]
     target = data["target"]
@@ -62,3 +64,5 @@ def subset_sum_top_down(data, n=None, target=None, memo=None):
     return result
 
 
+def binary_individual(num_items):
+    return [random.randint(0, 1) for _ in range(num_items)]

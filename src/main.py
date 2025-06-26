@@ -1,22 +1,24 @@
 from genetic.algorithm import genetic_algorithm
-from genetic.knapsack import fitness_knapsack
-from genetic.knapsack import recursive_knapsack
-from genetic.knapsack import dp_topdown_knapsack
+from genetic.MKS import fitness_knapsack, recursive_knapsack, dp_topdown_knapsack, binary_individual as knapsack_individual
+from genetic.bin_packing import fitness_bin_packing, bin_packing_individual
+from genetic.subset_sum import fitness_subset_sum, binary_individual
 
 import time
-# Datos de ejemplo (mochila multidimensional)
-data = {
+
+# --- Problema Knapsack ---
+
+data_knapsack = {
     "weights": [
-        [2, 2],  # Item 0
-        [4, 2],  # Item 1
-        [3, 4],  # Item 2
-        [6, 1],  # Item 3
-        [1, 3],  # Item 4
-        [2, 5],  # Item 5
-        [5, 3],  # Item 6
-        [4, 4],  # Item 7
-        [3, 2],  # Item 8
-        [2, 1]   # Item 9
+        [2, 2],
+        [4, 2],
+        [3, 4],
+        [6, 1],
+        [1, 3],
+        [2, 5],
+        [5, 3],
+        [4, 4],
+        [3, 2],
+        [2, 1]
     ],
     "values": [40, 50, 60, 30, 20, 70, 80, 55, 25, 15],
     "capacities": [15, 15],
@@ -27,7 +29,8 @@ data = {
 start = time.perf_counter()
 solution, fitness, history = genetic_algorithm(
     fitness_func=fitness_knapsack,
-    data=data,
+    data=data_knapsack,
+    create_individual=knapsack_individual,
     generations=100,
     population_size=200,
     crossover_rate=0.8,
@@ -38,34 +41,33 @@ solution, fitness, history = genetic_algorithm(
 )
 end = time.perf_counter()
 
-print("\nMejor solución:", solution)
-print("Fitness:", fitness)
-print(f"Genetic solution: time: {end - start:.6f} seconds")
+print("\nMejor solución knapsack:", solution)
+print("Fitness knapsack:", fitness)
+print(f"Tiempo solución genética knapsack: {end - start:.6f} segundos")
 
 start = time.perf_counter()
-resultado_recursivo = recursive_knapsack(data)
+resultado_recursivo = recursive_knapsack(data_knapsack)
 end = time.perf_counter()
-print(f"Recursive solution: {resultado_recursivo}, time: {end - start:.6f} seconds")
+print(f"Solución recursiva knapsack: {resultado_recursivo}, tiempo: {end - start:.6f} segundos")
 
 start = time.perf_counter()
-resultado_dp = dp_topdown_knapsack(data)
+resultado_dp = dp_topdown_knapsack(data_knapsack)
 end = time.perf_counter()
-print(f"DP top-down solution: {resultado_dp}, time: {end - start:.6f} seconds")
+print(f"Solución DP top-down knapsack: {resultado_dp}, tiempo: {end - start:.6f} segundos")
 
 
+# --- Problema Subset Sum ---
 
-
-from genetic.subset_sum import fitness_subset_sum
-
-data = {
+data_subset = {
     "items": [3, 34, 4, 12, 5, 2],
     "target": 9
 }
 
-# Ejecutar el algoritmo genético
+start = time.perf_counter()
 solution, fitness, history = genetic_algorithm(
     fitness_func=fitness_subset_sum,
-    data=data,
+    data=data_subset,
+    create_individual=binary_individual,
     generations=100,
     population_size=200,
     crossover_rate=0.8,
@@ -74,11 +76,46 @@ solution, fitness, history = genetic_algorithm(
     selection_method="tournament",
     verbose=True
 )
+end = time.perf_counter()
+print(f"Tiempo solución genética subset_sum: {end - start:.6f} segundos")
 
-# Mostrar resultado
-print("\nMejor solución:", solution)
-print("Suma alcanzada:", fitness)
+print("\nMejor solución subset sum:", solution)
+print("Suma alcanzada subset sum:", fitness)
+items_elegidos = [item for gene, item in zip(solution, data_subset["items"]) if gene]
+print("Ítems seleccionados subset sum:", items_elegidos)
 
-# Mostrar los elementos seleccionados
-items_elegidos = [item for gene, item in zip(solution, data["items"]) if gene]
-print("Items seleccionados:", items_elegidos)
+
+# --- Problema Bin Packing ---
+
+data_binpacking = {
+    "items": [4, 8, 1, 4, 2, 1, 7, 3],
+    "bin_capacity": 10
+}
+
+start = time.perf_counter()
+solution, fitness, history = genetic_algorithm(
+    fitness_func=fitness_bin_packing,
+    data=data_binpacking,
+    create_individual=bin_packing_individual,
+    population_size=100,
+    generations=200,
+    crossover_rate=0.8,
+    mutation_rate=0.02,
+    elitism_count=2,
+    selection_method="ranking",
+    verbose=True
+)
+end = time.perf_counter()
+print(f"Tiempo solución genética bin_packing: {end - start:.6f} segundos")
+
+print("\nMejor solución bin packing:", solution)
+print("Fitness bin packing:", fitness)
+
+# Mostrar bins con sus items
+bins = {}
+for item, bin_idx in zip(data_binpacking["items"], solution):
+    bins.setdefault(bin_idx, []).append(item)
+
+print("Items agrupados en bins:")
+for b, items_in_bin in bins.items():
+    print(f"Bin {b}: {items_in_bin}")

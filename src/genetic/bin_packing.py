@@ -1,3 +1,5 @@
+import random
+
 def fitness_bin_packing(chromosome, data):
     items = data["items"]
     capacity = data["bin_capacity"]
@@ -105,3 +107,7 @@ def dp_bin_packing(items, bin_capacity=1.0):
 
     _, best_assignment = helper(0, [], [])
     return best_assignment
+
+
+def bin_packing_individual(num_items):
+    return [random.randint(0, num_items - 1) for _ in range(num_items)]

@@ -79,3 +79,6 @@ def fitness_knapsack(chromosome, data):
             total_value += item_values[i]
 
     return total_value
+
+def binary_individual(num_items):
+    return [random.randint(0, 1) for _ in range(num_items)]

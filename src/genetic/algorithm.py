@@ -5,18 +5,17 @@ from .utils import should_stop
 
 import random
 
+
 def genetic_algorithm(fitness_func, data, *,
                       population_size=50, generations=200,
                       crossover_rate=0.8, mutation_rate=0.01,
                       elitism_count=2, selection_method="ranking",
-                      max_no_improvement=30, verbose=False):
-    
-    num_items = len(data["items"])
-    num_dimensions = data.get("num_dimensions", 1)
-    population = [[random.randint(0, 1) for _ in range(num_items)] for _ in range(population_size)]
-    
+                      max_no_improvement=30, verbose=False,
+                      create_individual=None):
+
+    population = [create_individual(len(data["items"])) for _ in range(population_size)]
     best_solution = None
-    best_fitness = 0
+    best_fitness = float('-inf')
     fitness_history = []
     no_improvement = 0
 
@@ -45,10 +44,8 @@ def genetic_algorithm(fitness_func, data, *,
 
         params = {
             "selection_method": selection_method,
-            "tournament_size": 3  # o el valor que uses
+            "tournament_size": 3
         }
-
-        parent1, parent2 = select_parents(population, fitness_scores, params)
 
         children = []
         while len(children) < population_size - elitism_count:
