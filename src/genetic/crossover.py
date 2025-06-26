@@ -1,11 +1,19 @@
 import random
 
-def crossover(parent1, parent2, crossover_rate):
+def crossover(parent1, parent2, crossover_rate, operator="uniform"):
     if random.random() > crossover_rate:
         return parent1.copy()
 
-    point = random.randint(1, len(parent1) - 1)
-    return parent1[:point] + parent2[point:]
+    if operator == "one_point":
+        child1, _ = one_point_crossover(parent1, parent2)
+    elif operator == "two_point":
+        child1, _ = two_point_crossover(parent1, parent2)
+    elif operator == "uniform":
+        child1, _ = uniform_crossover(parent1, parent2)
+    else:
+        raise ValueError(f"Operador de cruce desconocido: {operator}")
+
+    return child1
 
 
 def one_point_crossover(p1, p2):
@@ -14,14 +22,12 @@ def one_point_crossover(p1, p2):
     child2 = p2[:point] + p1[point:]
     return child1, child2
 
-
 def two_point_crossover(p1, p2):
     point1 = random.randint(0, len(p1) - 2)
     point2 = random.randint(point1 + 1, len(p1) - 1)
     child1 = p1[:point1] + p2[point1:point2] + p1[point2:]
     child2 = p2[:point1] + p1[point1:point2] + p2[point2:]
     return child1, child2
-
 
 def uniform_crossover(p1, p2):
     child1 = []
