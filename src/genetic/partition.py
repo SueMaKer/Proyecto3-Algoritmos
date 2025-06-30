@@ -3,16 +3,21 @@ import random
 def partition_individual(num_items, data=None):
     return [random.randint(0, 1) for _ in range(num_items)]
 
+import math
+import random
+
+# FITNESS FUNCTION MEJORADA
 def fitness_partition(chromosome, data):
     items = data["items"]
     group_a = sum(item for gene, item in zip(chromosome, items) if gene == 1)
     group_b = sum(item for gene, item in zip(chromosome, items) if gene == 0)
     diff = abs(group_a - group_b)
-    return 1 / (1 + diff)
+    return 1 / (1 + diff**2)  # penalización más suave pero más efectiva
 
-
+# DP TOPDOWN (CON MEMOIZACIÓN)
 def dp_topdown_partition(data):
-    nums = data ["items"]
+    print("entra dp")
+    nums = data["items"]
     total_sum = sum(nums)
     if total_sum % 2 != 0:
         return False
@@ -28,7 +33,6 @@ def dp_topdown_partition(data):
         if (i, current_sum) in memo:
             return memo[(i, current_sum)]
 
-        # Incluye o excluye el elemento actual
         include = helper(i + 1, current_sum + nums[i])
         exclude = helper(i + 1, current_sum)
         memo[(i, current_sum)] = include or exclude
@@ -36,13 +40,13 @@ def dp_topdown_partition(data):
 
     return helper(0, 0)
 
-
-
+# RECURSIVO PURO
 def recursive_partition(data):
-    nums = data ["items"]
+    print("entra recursive")
+    nums = data["items"]
     total_sum = sum(nums)
     if total_sum % 2 != 0:
-        return False  # No se puede dividir en dos subconjuntos iguales
+        return False
 
     target = total_sum // 2
 
@@ -55,16 +59,23 @@ def recursive_partition(data):
 
     return helper(0, 0)
 
+# INDIVIDUO HEURÍSTICO MEJORADO (con ruido opcional)
 def heuristic_individual_partition(n_items, data):
     chromosome = [0] * n_items
     sum_a = 0
     sum_b = 0
     items = data["items"]
     for i in range(n_items):
-        if sum_a <= sum_b:
-            chromosome[i] = 1
+        if abs(sum_a - sum_b) < 5 and random.random() < 0.3:
+            gene = random.randint(0, 1)
+        else:
+            gene = 1 if sum_a <= sum_b else 0
+        chromosome[i] = gene
+        if gene == 1:
             sum_a += items[i]
         else:
-            chromosome[i] = 0
             sum_b += items[i]
     return chromosome
+
+
+
