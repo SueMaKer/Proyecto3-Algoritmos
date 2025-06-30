@@ -1,23 +1,29 @@
 import random
 
+# Recursive solution for the multi-dimensional knapsack problem
 def recursive_knapsack(data, index=0, remaining_caps=None):
+    # Initialize remaining capacities if not provided
     if remaining_caps is None:
         remaining_caps = data["capacities"].copy()
-    item_weights = data["weights"]
-    item_values = data["values"]
-    num_dimensions = data.get("num_dimensions", 1)
+    item_weights = data["weights"]     # List of item weights per dimension
+    item_values = data["values"]       # List of item values
+    num_dimensions = data.get("num_dimensions", 1)  # Number of dimensions
 
+    # Base case: all items considered
     if index == len(item_weights):
         return 0
 
+    # Option 1: skip current item
     max_value = recursive_knapsack(data, index + 1, remaining_caps)
 
+    # Check if current item can be included within capacity constraints
     can_include = True
     for d in range(num_dimensions):
         if item_weights[index][d] > remaining_caps[d]:
             can_include = False
             break
 
+    # Option 2: include current item if possible
     if can_include:
         updated_caps = remaining_caps.copy()
         for d in range(num_dimensions):
@@ -30,7 +36,9 @@ def recursive_knapsack(data, index=0, remaining_caps=None):
     return max_value
 
 
+# Top-down dynamic programming solution with memoization for knapsack
 def dp_topdown_knapsack(data, index=0, remaining_caps=None, memo_table=None):
+    # Initialize remaining capacities and memo table if not provided
     if remaining_caps is None:
         remaining_caps = data["capacities"].copy()
     if memo_table is None:
@@ -40,15 +48,20 @@ def dp_topdown_knapsack(data, index=0, remaining_caps=None, memo_table=None):
     item_values = data["values"]
     num_dimensions = data.get("num_dimensions", 1)
 
+    # Create a state key based on current index and capacities for memoization
     state_key = (index, tuple(remaining_caps))
+    # Base case: all items processed
     if index == len(item_weights):
         return 0
 
+    # Return memoized result if available
     if state_key in memo_table:
         return memo_table[state_key]
 
+    # Option 1: skip current item
     max_value = dp_topdown_knapsack(data, index + 1, remaining_caps, memo_table)
 
+    # Option 2: include current item if it fits in all dimensions
     if all(item_weights[index][d] <= remaining_caps[d] for d in range(num_dimensions)):
         updated_caps = list(remaining_caps)
         for d in range(num_dimensions):
@@ -58,40 +71,55 @@ def dp_topdown_knapsack(data, index=0, remaining_caps=None, memo_table=None):
             item_values[index] + dp_topdown_knapsack(data, index + 1, updated_caps, memo_table)
         )
 
+    # Memoize and return the best value for this state
     memo_table[state_key] = max_value
     return max_value
 
+
+# Fitness function to evaluate a candidate knapsack solution (chromosome)
 def fitness_knapsack(chromosome, data):
     item_weights = data["weights"]
     item_values = data["values"]
     capacities = data["capacities"]
     num_dimensions = data["num_dimensions"]
 
-    remaining = capacities[:]
-    total_value = 0
+    remaining = capacities[:]  # Track remaining capacity per dimension
+    total_value = 0            # Accumulate total value of selected items
 
+    # Iterate over each item and its selection status
     for i, selected in enumerate(chromosome):
         if selected:
+            # Subtract item's weight from remaining capacity in each dimension
             for d in range(num_dimensions):
                 remaining[d] -= item_weights[i][d]
+                # Penalize if capacity exceeded in any dimension
                 if remaining[d] < 0:
-                    return 0  # Penalización por sobrecapacidad
+                    return 0
+            # Add item's value to total
             total_value += item_values[i]
 
     return total_value
 
+
+# Generate a random individual (chromosome) for knapsack problem (0/1 selection)
 def knapsack_individual(n_items, data=None):
+    # Randomly assign 0 or 1 for each item indicating exclusion/inclusion
     return [random.randint(0, 1) for _ in range(n_items)]
 
+
+# Heuristic to generate an initial knapsack solution prioritizing best value/weight ratios
 def heuristic_individual_knapsack(n_items, data):
+    # Calculate value-to-weight ratio for each item (weight summed over dimensions)
     ratios = [(v / sum(w), i) for i, (v, w) in enumerate(zip(data["values"], data["weights"]))]
+    # Sort items descending by ratio
     ratios.sort(reverse=True)
     chromosome = [0] * n_items
-    current = [0] * data["num_dimensions"]
+    current = [0] * data["num_dimensions"]  # Track current used capacity in each dimension
     for _, i in ratios:
+        # Check if item fits in remaining capacity in all dimensions
         fits = all(current[d] + data["weights"][i][d] <= data["capacities"][d] for d in range(data["num_dimensions"]))
         if fits:
-            chromosome[i] = 1
+            chromosome[i] = 1  # Select item
             for d in range(data["num_dimensions"]):
-                current[d] += data["weights"][i][d]
+                current[d] += data["weights"][i][d]  # Update used capacity
     return chromosome

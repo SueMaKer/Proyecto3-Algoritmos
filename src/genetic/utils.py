@@ -1,41 +1,46 @@
+# Function to check if the genetic algorithm should stop due to lack of improvement
 def should_stop(no_improvement, max_no_improvement):
     """
-    Verifica si se debe detener el algoritmo genético por falta de mejora.
-    
+    Checks whether the genetic algorithm should stop because of no improvement.
+
     Args:
-        no_improvement (int): número de generaciones sin mejora.
-        max_no_improvement (int): máximo permitido sin mejora.
+        no_improvement (int): Number of generations without improvement.
+        max_no_improvement (int): Maximum allowed generations without improvement.
 
     Returns:
-        bool: True si se debe detener, False si se continúa.
+        bool: True if the algorithm should stop, False otherwise.
     """
     return no_improvement >= max_no_improvement
 
 
+# Function to update the best fitness and solution if improvement occurs
 def track_best(evaluated, best_fitness, best_solution):
     """
-    Actualiza el mejor fitness y solución si hay mejora.
+    Updates the best fitness and solution if there is an improvement.
 
     Args:
-        evaluated (list): lista de tuplas (chromosome, fitness).
-        best_fitness (float): mejor fitness actual.
-        best_solution (list): mejor solución actual.
+        evaluated (list): List of tuples (chromosome, fitness).
+        best_fitness (float): Current best fitness value.
+        best_solution (list): Current best solution.
 
     Returns:
-        tuple: (nuevo_best_solution, nuevo_best_fitness, mejoró)
+        tuple: (new_best_solution, new_best_fitness, improved_flag)
     """
     current_best = evaluated[0]
     if current_best[1] > best_fitness:
+        # Return new best solution and fitness, and a flag indicating improvement
         return current_best[0], current_best[1], True
+    # Otherwise return the old best and indicate no improvement
     return best_solution, best_fitness, False
 
 
+# Function to set the random seed for reproducibility
 def seed_everything(seed_value):
     """
-    Configura la semilla aleatoria para reproducibilidad.
+    Sets the random seed for reproducibility.
 
     Args:
-        seed_value (int): semilla deseada.
+        seed_value (int): Desired seed value.
     """
     import random
     import numpy as np

@@ -7,6 +7,8 @@ from problems.partition import fitness_partition, partition_individual, recursiv
 import time
 import random
 
+
+# Measures the average execution time of a function over multiple repetitions
 def measure_average_time(func, data, repetitions=30):
     times = []
     for _ in range(repetitions):
@@ -16,6 +18,8 @@ def measure_average_time(func, data, repetitions=30):
         times.append(end - start)
     return sum(times) / len(times)
 
+
+# Runs experiments for different problems using genetic algorithm and exact methods
 def run_all_experiments(
     population_size=200,
     generations=100,
@@ -30,12 +34,14 @@ def run_all_experiments(
     mutation_operator="bit_flip",
     elitism_proportion=0.05
 ):
-    random.seed(42)  # Reproducibilidad
+    random.seed(42)  # Set seed for reproducibility
 
+    # Generate random problem data for experiments
     items_generated = [random.randint(1, 10) for _ in range(num_items)]
     weights_generated = [[random.randint(1, 6), random.randint(1, 6)] for _ in range(num_items)]
     values_generated = [random.randint(10, 100) for _ in range(num_items)]
 
+    # Define a list of problem configurations, including their data and associated functions
     problems = [
         {
             "name": "Knapsack",
@@ -91,13 +97,16 @@ def run_all_experiments(
 
     latex_rows = []
 
+    # Iterate through each problem, solve with GA and exact methods, measure time and fitness
     for problem in problems:
         print(f"\n--- Problema {problem['name']} ---")
 
         create_individual = problem["individual"]
+        # Choose heuristic initialization if specified and available
         if init_method == "heuristic" and "heuristic_individual" in problem:
             create_individual = problem["heuristic_individual"]
 
+        # Run genetic algorithm and measure elapsed time
         start = time.perf_counter()
         solution, fitness, history = genetic_algorithm(
             fitness_func=problem["fitness"],
@@ -117,16 +126,18 @@ def run_all_experiments(
         end = time.perf_counter()
         time_ga = end - start
 
+        # Measure average execution times of exact recursive and DP solutions
         time_recursive = measure_average_time(problem["exact_recursive"], problem["data"], repetitions)
         time_dp = measure_average_time(problem["exact_dp"], problem["data"], repetitions)
 
+        # Prepare LaTeX table row for the problem results
         latex_rows.append(f"{problem['name']} & {fitness:.4f} & {time_ga:.6f} & {time_recursive:.6f} & {time_dp:.6f} \\\\")
 
-    # Impresión de la tabla LaTeX completa
+    # Print LaTeX document preamble and parameters summary
     print("\\documentclass{article}")
     print("\\usepackage[utf8]{inputenc}")
     print("\\usepackage[spanish]{babel}")
-    print("\\usepackage{float}")  # para [H]
+    print("\\usepackage{float}")  # For [H] float placement
     print("\\usepackage{amsmath}")
     print("\\usepackage{graphicx}")
     print("\\begin{document}")
@@ -145,6 +156,7 @@ def run_all_experiments(
     print(f"- Proporción de elitismo: {elitism_proportion}\\\\")
     print(f"- Métodos exactos: {repetitions} repeticiones promedio para medir tiempo\\\\\n")
 
+    # Print LaTeX table header and rows with results
     print("\\begin{table}[H]")
     print("\\centering")
     print("\\begin{tabular}{|l|c|c|c|c|}")
@@ -165,20 +177,19 @@ def run_all_experiments(
     print("\\end{document}")
 
 
+# Main execution block to run experiments with specified parameters
 if __name__ == "__main__":
     run_all_experiments(
         population_size=500,
         generations=50,
         repetitions=1,
         num_items=15,
-        init_method="random",            # "heuristic" , "random"
-        selection_method="tournament",      # "tournament", "ranking", "roulette"
+        init_method="random",            # Options: "heuristic" or "random"
+        selection_method="tournament",   # Options: "tournament", "ranking", "roulette"
         tournament_size=4,
         mutation_rate=0.6,
         crossover_rate=0.7,
-        crossover_operator="one_point",       # "one_point", "two_point", "uniform"
-        mutation_operator="bit_flip",       # "bit_flip", "swap"
-        elitism_proportion=0.6            # proporción de individuos elitistas
-
+        crossover_operator="one_point",  # Options: "one_point", "two_point", "uniform"
+        mutation_operator="bit_flip",    # Options: "bit_flip", "swap"
+        elitism_proportion=0.6            # Proportion of elite individuals to keep
     )
- 
