@@ -10,7 +10,7 @@ import random
 def genetic_algorithm(fitness_func, data, *,
                       population_size=50, generations=200,
                       crossover_rate=0.8, mutation_rate=0.01,
-                      elitism_rate=0.05,  # proporción en lugar de conteo fijo
+                      elitism_rate=0.05,
                       selection_method="ranking",
                       max_no_improvement=30, verbose=False,
                       create_individual=None, crossover_operator="uniform",
@@ -19,6 +19,7 @@ def genetic_algorithm(fitness_func, data, *,
     population = [create_individual(len(data["items"]), data) for _ in range(population_size)]
     best_solution = None
     best_fitness = float('-inf')
+    best_avg_fitness = float('-inf')
     fitness_history = []
     no_improvement = 0
 
@@ -26,24 +27,31 @@ def genetic_algorithm(fitness_func, data, *,
         evaluated = [(chrom, fitness_func(chrom, data)) for chrom in population]
         evaluated.sort(key=lambda x: x[1], reverse=True)
 
+        population = [chrom for chrom, _ in evaluated]
+        fitness_scores = [fit for _, fit in evaluated]
+
+        avg_fitness = sum(fitness_scores) / len(fitness_scores)
+
         if evaluated[0][1] > best_fitness:
             best_fitness = evaluated[0][1]
             best_solution = evaluated[0][0]
+            best_avg_fitness = avg_fitness
+            no_improvement = 0
+        elif avg_fitness > best_avg_fitness + 1e-5:  # mejora general leve
+            best_avg_fitness = avg_fitness
             no_improvement = 0
         else:
             no_improvement += 1
 
         if verbose:
-            print(f"Gen {gen}: Best fitness = {best_fitness}")
+            print(f"Gen {gen}: Best fitness = {best_fitness:.6f}, Avg fitness = {avg_fitness:.6f}")
 
         if no_improvement >= max_no_improvement:
             if verbose:
                 print(f"Converged at generation {gen}")
             break
 
-        population = [chrom for chrom, _ in evaluated]
-        fitness_scores = [fit for _, fit in evaluated]
-
+        # Aplicar elitismo y reproducción
         params = {
             "selection_method": selection_method,
             "tournament_size": tournament_size,

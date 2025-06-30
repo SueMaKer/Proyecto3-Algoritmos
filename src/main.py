@@ -123,52 +123,62 @@ def run_all_experiments(
         latex_rows.append(f"{problem['name']} & {fitness:.4f} & {time_ga:.6f} & {time_recursive:.6f} & {time_dp:.6f} \\\\")
 
     # Impresión de la tabla LaTeX completa
-    print("\n=== TABLA COMPARATIVA (FORMATO LATEX) ===\n")
-    print("\\noindent\\textbf{Par\'ametros de la prueba:}\\\\")
-    print(f"- Tama\\~no del conjunto de \\textit{{items}}: {num_items}\\\\")
-    print(f"- Inicializaci\'on: {init_method}\\\\")
-    print(f"- Algoritmo gen\'etico: poblaci\'on = {population_size}, generaciones = {generations}\\\\")
-    print(f"- M\'etodo de selecci\'on: {selection_method}\\\\")
+    print("\\documentclass{article}")
+    print("\\usepackage[utf8]{inputenc}")
+    print("\\usepackage[spanish]{babel}")
+    print("\\usepackage{float}")  # para [H]
+    print("\\usepackage{amsmath}")
+    print("\\usepackage{graphicx}")
+    print("\\begin{document}")
+
+    print("\\noindent\\textbf{Parámetros de la prueba:}\\\\")
+    print(f"- Tamaño del conjunto de \\textit{{items}}: {num_items}\\\\")
+    print(f"- Inicialización: {init_method}\\\\")
+    print(f"- Algoritmo genético: población = {population_size}, generaciones = {generations}\\\\")
+    print(f"- Método de selección: {selection_method}\\\\")
     if selection_method == "tournament":
-        print(f"- Tama\\~no de torneo: {tournament_size}\\\\")
+        print(f"- Tamaño de torneo: {tournament_size}\\\\")
     print(f"- Tasa de cruce: {crossover_rate}\\\\")
     print(f"- Operador de cruce: {crossover_operator}\\\\")
-    print(f"- Tasa de mutaci\'on: {mutation_rate}\\\\")
-    print(f"- Operador de mutaci\'on: {mutation_operator}\\\\")
-    print(f"- Proporci\'on de elitismo: {elitism_proportion}\\\\")
-    print(f"- M\'etodos exactos: {repetitions} repeticiones promedio para medir tiempo\\\\\n")
+    print(f"- Tasa de mutación: {mutation_rate}\\\\")
+    print(f"- Operador de mutación: {mutation_operator}\\\\")
+    print(f"- Proporción de elitismo: {elitism_proportion}\\\\")
+    print(f"- Métodos exactos: {repetitions} repeticiones promedio para medir tiempo\\\\\n")
 
     print("\\begin{table}[H]")
     print("\\centering")
     print("\\begin{tabular}{|l|c|c|c|c|}")
     print("\\hline")
-    print("\\textbf{Problema} & \\textbf{Fitness GA} & \\textbf{Tiempo GA (s)} & \\textbf{Tiempo Recursivo (s)} & \\textbf{Tiempo DP (s)} \\\\")
+    print("\\textbf{Problema} & \\textbf{Fitness GA} & \\textbf{Tiempo GA (ms)} & \\textbf{Tiempo Recursivo (ms)} & \\textbf{Tiempo DP (ms)} \\\\")
     print("\\hline")
     for row in latex_rows:
         row = row.strip()
         if not row.endswith("\\\\"):
-            row += " \\\\"  # doble barra para LaTeX
+            row += " \\\\"
         print(row)
     print("\\hline")
     print("\\end{tabular}")
-    print("\\caption{Comparaci\'on de algoritmos gen\'eticos, recursivos y programaci\'on din\'amica}")
+    print("\\caption{Comparación de algoritmos genéticos, recursivos y programación dinámica (tiempos en milisegundos)}")
     print("\\label{tab:comparacion_algoritmos}")
     print("\\end{table}")
 
+    print("\\end{document}")
+
+
 if __name__ == "__main__":
     run_all_experiments(
-        population_size=150,
-        generations=80,
-        repetitions=30,
-        num_items=15,
+        population_size=500,
+        generations=5000,
+        repetitions=1,
+        num_items=21,
         init_method="random",            # "heuristic" , "random"
-        selection_method="roulette",      # "tournament", "ranking", "roulette"
-        tournament_size=3,
-        mutation_rate=0.2,
-        crossover_rate=0.8,
-        crossover_operator="uniform",       # "one_point", "two_point", "uniform"
+        selection_method="tournament",      # "tournament", "ranking", "roulette"
+        tournament_size=4,
+        mutation_rate=0.6,
+        crossover_rate=0.7,
+        crossover_operator="one_point",       # "one_point", "two_point", "uniform"
         mutation_operator="bit_flip",       # "bit_flip", "swap"
-        elitism_proportion=0.06             # proporción de individuos elitistas
+        elitism_proportion=0.6            # proporción de individuos elitistas
 
     )
  
