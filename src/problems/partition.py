@@ -1,18 +1,25 @@
 import random
-
-def partition_individual(num_items, data=None):
-    return [random.randint(0, 1) for _ in range(num_items)]
-
 import math
 import random
 
-# FITNESS FUNCTION MEJORADA
-def fitness_partition(chromosome, data):
-    items = data["items"]
-    group_a = sum(item for gene, item in zip(chromosome, items) if gene == 1)
-    group_b = sum(item for gene, item in zip(chromosome, items) if gene == 0)
-    diff = abs(group_a - group_b)
-    return 1 / (1 + diff**2)  # penalización más suave pero más efectiva
+# RECURSIVO PURO
+def recursive_partition(data):
+    print("entra recursive")
+    nums = data["items"]
+    total_sum = sum(nums)
+    if total_sum % 2 != 0:
+        return False
+
+    target = total_sum // 2
+
+    def helper(i, current_sum):
+        if current_sum == target:
+            return True
+        if i == len(nums) or current_sum > target:
+            return False
+        return helper(i + 1, current_sum + nums[i]) or helper(i + 1, current_sum)
+
+    return helper(0, 0)
 
 # DP TOPDOWN (CON MEMOIZACIÓN)
 def dp_topdown_partition(data):
@@ -40,24 +47,17 @@ def dp_topdown_partition(data):
 
     return helper(0, 0)
 
-# RECURSIVO PURO
-def recursive_partition(data):
-    print("entra recursive")
-    nums = data["items"]
-    total_sum = sum(nums)
-    if total_sum % 2 != 0:
-        return False
 
-    target = total_sum // 2
+# FITNESS FUNCTION MEJORADA
+def fitness_partition(chromosome, data):
+    items = data["items"]
+    group_a = sum(item for gene, item in zip(chromosome, items) if gene == 1)
+    group_b = sum(item for gene, item in zip(chromosome, items) if gene == 0)
+    diff = abs(group_a - group_b)
+    return 1 / (1 + diff**2)  # penalización más suave pero más efectiva
 
-    def helper(i, current_sum):
-        if current_sum == target:
-            return True
-        if i == len(nums) or current_sum > target:
-            return False
-        return helper(i + 1, current_sum + nums[i]) or helper(i + 1, current_sum)
-
-    return helper(0, 0)
+def partition_individual(num_items, data=None):
+    return [random.randint(0, 1) for _ in range(num_items)]
 
 # INDIVIDUO HEURÍSTICO MEJORADO (con ruido opcional)
 def heuristic_individual_partition(n_items, data):

@@ -1,8 +1,8 @@
 from genetic.algorithm import genetic_algorithm
-from genetic.MKS import fitness_knapsack, recursive_knapsack, dp_topdown_knapsack, knapsack_individual, heuristic_individual_knapsack
-from genetic.bin_packing import fitness_bin_packing, bin_packing_individual, recursive_bin_packing, dp_bin_packing, heuristic_individual_binpacking
-from genetic.subset_sum import fitness_subset_sum, subset_individual, recursive_subset_sum, subset_sum_top_down, heuristic_individual_subset
-from genetic.partition import fitness_partition, partition_individual, recursive_partition, dp_topdown_partition, heuristic_individual_partition
+from problems.MKS import fitness_knapsack, recursive_knapsack, dp_topdown_knapsack, knapsack_individual, heuristic_individual_knapsack
+from problems.bin_packing import fitness_bin_packing, bin_packing_individual, recursive_bin_packing, dp_bin_packing, heuristic_individual_binpacking
+from problems.subset_sum import fitness_subset_sum, subset_individual, recursive_subset_sum, subset_sum_top_down, heuristic_individual_subset
+from problems.partition import fitness_partition, partition_individual, recursive_partition, dp_topdown_partition, heuristic_individual_partition
 
 import time
 import random
@@ -168,9 +168,9 @@ def run_all_experiments(
 if __name__ == "__main__":
     run_all_experiments(
         population_size=500,
-        generations=5000,
+        generations=50,
         repetitions=1,
-        num_items=21,
+        num_items=15,
         init_method="random",            # "heuristic" , "random"
         selection_method="tournament",      # "tournament", "ranking", "roulette"
         tournament_size=4,

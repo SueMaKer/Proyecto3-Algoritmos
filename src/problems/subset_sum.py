@@ -1,17 +1,5 @@
 import random
 
-def fitness_subset_sum(chromosome, data):
-    items = data["items"]
-    target = data["target"]
-
-    total = sum(item for gene, item in zip(chromosome, items) if gene)
-
-    if total > target:
-        return 0  # Penalización por exceder el target
-    else:
-        return total  # Cuanto más cerca del target, mejor
-
-
 # cambiar n a cantidad de elementos
 def recursive_subset_sum(data, n=None, target=None):
     nums = data["items"]
@@ -63,6 +51,16 @@ def subset_sum_top_down(data, n=None, target=None, memo=None):
     memo[key] = result
     return result
 
+def fitness_subset_sum(chromosome, data):
+    items = data["items"]
+    target = data["target"]
+
+    total = sum(item for gene, item in zip(chromosome, items) if gene)
+
+    if total > target:
+        return 0  # Penalización por exceder el target
+    else:
+        return total  # Cuanto más cerca del target, mejor
 
 def subset_individual(num_items, data):
     return [random.randint(0, 1) for _ in range(num_items)]

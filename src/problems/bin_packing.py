@@ -1,36 +1,5 @@
 import random
 
-def fitness_bin_packing(chromosome, data):
-    items = data["items"]
-    capacity = data["bin_capacity"]
-
-    bins = {}
-
-    for item_idx, bin_idx in enumerate(chromosome):
-        bins.setdefault(bin_idx, 0)
-        bins[bin_idx] += items[item_idx]
-
-    used_bins = len(bins)
-    valid_bins = 0
-    penalty = 0
-
-    for total_weight in bins.values():
-        if total_weight <= capacity:
-            valid_bins += 1
-        else:
-            # Penalty for exceeding capacity
-            penalty += (total_weight - capacity) * 10
-
-    if used_bins == 0:
-        return 0
-
-    fitness = (1000 * valid_bins / used_bins) - penalty
-    return max(fitness, 0)
-
-
-def bin_packing_individual(num_items, data=None):
-    import random
-    return [random.randint(0, num_items - 1) for _ in range(num_items)]
 
 def recursive_bin_packing(data):
     items = data ["items"]
@@ -63,6 +32,7 @@ def recursive_bin_packing(data):
 
     backtrack(0, [], [])
     return best["assignment"]
+
 
 def dp_bin_packing(data):
     items = data ["items"]
@@ -111,6 +81,38 @@ def dp_bin_packing(data):
     _, best_assignment = helper(0, [], [])
     return best_assignment
 
+
+def fitness_bin_packing(chromosome, data):
+    items = data["items"]
+    capacity = data["bin_capacity"]
+
+    bins = {}
+
+    for item_idx, bin_idx in enumerate(chromosome):
+        bins.setdefault(bin_idx, 0)
+        bins[bin_idx] += items[item_idx]
+
+    used_bins = len(bins)
+    valid_bins = 0
+    penalty = 0
+
+    for total_weight in bins.values():
+        if total_weight <= capacity:
+            valid_bins += 1
+        else:
+            # Penalty for exceeding capacity
+            penalty += (total_weight - capacity) * 10
+
+    if used_bins == 0:
+        return 0
+
+    fitness = (1000 * valid_bins / used_bins) - penalty
+    return max(fitness, 0)
+
+
+def bin_packing_individual(num_items, data=None):
+    import random
+    return [random.randint(0, num_items - 1) for _ in range(num_items)]
 
 
 def heuristic_individual_binpacking(n_items, data):
